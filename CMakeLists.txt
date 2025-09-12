@@ -43,13 +43,18 @@ if (USE_VCPKG)
     find_package(SDL2_image CONFIG REQUIRED)
     find_package(SDL2_ttf   CONFIG REQUIRED)
     find_package(SDL2_mixer CONFIG REQUIRED)
+    find_package(Lua REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE
             SDL2::SDL2
             SDL2::SDL2main
             SDL2_image::SDL2_image
             SDL2_ttf::SDL2_ttf
             SDL2_mixer::SDL2_mixer
+            ${LUA_LIBRARIES}
     )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
 endif()
 
 # ---- Put the exe in a predictable place ----
