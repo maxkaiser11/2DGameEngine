@@ -1,89 +1,142 @@
-# SDL2 Game Engine Setup
+# vcpkg Setup & Build Guide — 2DGameEngine
 
-To run or build this project, follow the instructions below to correctly install all dependencies.
+This doc shows how to install **vcpkg**, install the SDL2 family, and build this project with CMake on Windows/macOS/Linux.
 
----
+## Requirements
+- Git
+- CMake 3.20+
+- C++ toolchain
+    - Windows: Visual Studio 2022 (or Build Tools) + optional Ninja
+    - macOS: Xcode command line tools
+    - Linux: GCC or Clang + build essentials
+- Optional: Ninja
 
-## ✅ Dependencies Required
+## 1) Install vcpkg
 
-You need to download and install the following libraries (specific versions):
-
-- [SDL2 v2.0.12 (VC)](https://github.com/libsdl-org/SDL/releases/tag/release-2.0.12)
-- [SDL2_image v2.0.5 (VC)](https://github.com/libsdl-org/SDL_image/releases/tag/release-2.0.5)
-- [SDL2_ttf v2.0.15 (VC)](https://github.com/libsdl-org/SDL_ttf/releases/tag/release-2.0.15)
-- [SDL2_mixer v2.0.4 (VC)](https://github.com/libsdl-org/SDL_mixer/releases/tag/release-2.0.4)
-- [Lua 5.3.5 (Windows Binaries)](https://sourceforge.net/projects/luabinaries/files/5.3.5/)
-
----
-
-## 📦 Step-by-Step Installation
-
-### 1. Create the SDL2 Directory
-
-On your **C:** drive, create a folder named `SDL2`:
-
-```
-C:\SDL2
+### Windows (PowerShell)
+```powershell
+mkdir C:\GameDev
+cd C:\GameDev
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+.\bootstrap-vcpkg.bat
+.\vcpkg integrate install  # optional
 ```
 
-### 2. Extract the Libraries
-
-For each downloaded SDL2-related `.zip` file (the VC development libraries):
-
-- Extract the `.zip` file.
-- Open the folder and locate `include` and `lib` subfolders.
-- Copy these `include` and `lib` folders into `C:\SDL2`.
-
-You should end up with this structure:
-
-```
-C:\SDL2\include\SDL2\...
-C:\SDL2\lib\x64\...
+### macOS / Linux (bash)
+```bash
+mkdir -p ~/Dev && cd ~/Dev
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install  # optional
 ```
 
-> You may merge the include and lib contents from each library.
+> Assume vcpkg is at:
+> - Windows: `C:\GameDev\vcpkg`
+> - macOS/Linux: `~/Dev/vcpkg`
 
----
+## 2) Install libraries
+SDL2 + image/ttf/mixer
 
-### 3. Copy the DLLs
-
-Copy the following DLLs (included in this project) into your **project root folder** — this is where your `.exe` file will be:
-
-- SDL2.dll
-- SDL2_image.dll
-- SDL2_mixer.dll
-- SDL2_ttf.dll
-- lua53.dll
-- zlib1.dll
-- libpng16-16.dll
-- libjpeg-9.dll
-- libtiff-5.dll
-- libwebp-7.dll
-
-> ⚠️ If any of these are missing next to your executable, the application will not start.
-
----
-
-## 🛠️ Build Configuration Notes
-
-In your IDE (e.g., Visual Studio) or build system (e.g., CMake), ensure you:
-
-- Add `C:\SDL2\include` to your include directories.
-- Add `C:\SDL2\lib` to your library directories.
-
-Link the following `.lib` files:
-
-```
-SDL2.lib
-SDL2main.lib
-SDL2_image.lib
-SDL2_mixer.lib
-SDL2_ttf.lib
-lua53.lib
+**Windows**
+```powershell
+C:\GameDev\vcpkg\vcpkg install sdl2 sdl2-image sdl2-ttf sdl2-mixer --triplet x64-windows
 ```
 
----
+**macOS (Intel)**
+```bash
+~/Dev/vcpkg/vcpkg install sdl2 sdl2-image sdl2-ttf sdl2-mixer --triplet x64-osx
+```
 
-## ✅ You're Ready!
+**macOS (Apple Silicon)**
+```bash
+~/Dev/vcpkg/vcpkg install sdl2 sdl2-image sdl2-ttf sdl2-mixer --triplet arm64-osx
+```
 
-Once all the steps are complete, you should be able to build and run the project without errors.
+**Linux (x64)**
+```bash
+~/Dev/vcpkg/vcpkg install sdl2 sdl2-image sdl2-ttf sdl2-mixer --triplet x64-linux
+```
+
+## 3) Configure & build with CMake
+
+**Windows + Ninja**
+```powershell
+if (Test-Path build) { rmdir build -Recurse -Force }
+cmake -S . -B build -G "Ninja" `
+  -DCMAKE_TOOLCHAIN_FILE="C:/GameDev/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+  -DVCPKG_TARGET_TRIPLET=x64-windows
+cmake --build build
+```
+
+**Windows + Visual Studio**
+```powershell
+if (Test-Path build) { rmdir build -Recurse -Force }
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+  -DCMAKE_TOOLCHAIN_FILE="C:/GameDev/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+  -DVCPKG_TARGET_TRIPLET=x64-windows
+cmake --build build --config Debug
+```
+
+**macOS / Linux**
+```bash
+rm -rf build
+cmake -S . -B build -G Ninja \
+  -DCMAKE_TOOLCHAIN_FILE="$HOME/Dev/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+  -DVCPKG_TARGET_TRIPLET=x64-osx   # or arm64-osx / x64-linux
+cmake --build build
+```
+
+## 4) Run
+Executable is in `build/bin`. CMake copies common asset folders next to it (assets/data/config/fonts/maps/textures). IDEs are set to run from that directory.
+
+## 5) CLion / VSCode / VS
+- **CLion**: Settings → CMake → CMake options:  
+  `-DCMAKE_TOOLCHAIN_FILE=C:/GameDev/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows`
+- **Visual Studio**: Use VS generator config above.
+- **VSCode (CMake Tools)**: Set those cache variables in your `settings.json`/Configure options.
+
+## 6) (Optional) CMakePresets.json
+```json
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "win-ninja-vcpkg",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "C:/GameDev/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "build", "configurePreset": "win-ninja-vcpkg" }
+  ]
+}
+```
+
+Use:
+```powershell
+cmake --preset win-ninja-vcpkg
+cmake --build --preset build
+```
+
+## 7) Troubleshooting
+- **Package not found** → Confirm triplet and reinstall packages for that triplet.
+- **Toolchain path wrong** → Check the path to `scripts/buildsystems/vcpkg.cmake`.
+- **Switching generators** → Delete `build/` and reconfigure.
+- **Ninja: rules.ninja missing** → Clean build dir and reconfigure.
+- **Black screen** → Run from `build/bin` where assets are copied.
+- **Mac junk files** → Remove `.DS_Store` and `._*` and add to `.gitignore`.
+
+## 8) One-liner
+```powershell
+git clone https://github.com/microsoft/vcpkg C:\GameDev\vcpkg
+C:\GameDev\vcpkg\bootstrap-vcpkg.bat
+C:\GameDev\vcpkg\vcpkg install sdl2 sdl2-image sdl2-ttf sdl2-mixer --triplet x64-windows
+cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="C:/GameDev/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
+cmake --build build
+```
