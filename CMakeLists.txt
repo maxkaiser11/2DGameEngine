@@ -24,7 +24,9 @@ file(GLOB IMGUI_BACKENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/imgui_impl_sdlrenderer2.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SRC_ALL} ${IMGUI_CORE} ${IMGUI_BACKENDS})
+add_executable(${PROJECT_NAME} ${SRC_ALL} ${IMGUI_CORE} ${IMGUI_BACKENDS}
+        src/Game/LevelLoader.cpp
+        src/Game/LevelLoader.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src

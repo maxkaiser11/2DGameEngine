@@ -6,6 +6,7 @@
 #include "../EventBus/EventBus.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "./Components/SpriteComponent.h"
 
 class MovementSystem: public System {
     public:
