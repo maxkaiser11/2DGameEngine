@@ -55,7 +55,7 @@ void Game::Initialize() {
     // This would enable fullscreen
    /* SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);*/
-    windowWidth = 1920;
+    windowWidth = 1280;
     windowHeight = 1080;
     window = SDL_CreateWindow(
         NULL,
@@ -148,7 +148,8 @@ void Game::Setup() {
 
     // Load first Level
     LevelLoader loader;
-    loader.LoadLevel(registry, assetStore, renderer, 1);
+    lua.open_libraries(sol::lib::base, sol::lib::math);
+    loader.LoadLevel(lua, registry, assetStore, renderer, 1);
 }
 
 void Game::Update() {

@@ -7,6 +7,7 @@
 #include "ECS/ECS.h"
 #include <memory>
 #include <SDL.h>
+#include <sol/sol.hpp>
 
 #include "AssetStore/AssetStore.h"
 
@@ -17,7 +18,7 @@ public:
     LevelLoader();
     ~LevelLoader();
 
-    void LoadLevel(const std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int level);
+    void LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int levelNumber);
 };
 
 
